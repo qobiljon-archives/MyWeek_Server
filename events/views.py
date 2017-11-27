@@ -159,11 +159,14 @@ def create_event(request):
 		if 'event_id' in json_body and Event.objects.filter(event_id=json_body['event_id'], is_active=True).exists():
 			# edit the existing event
 			event = Event.objects.get(event_id=json_body['event_id'], is_active=True)
+			event.delete() # delete the object from database
 
 			start_time = json_body['start_time'] if 'start_time' in json_body else event.start_time
 			length = json_body['length'] if 'length' in json_body else event.length
+
 			if overlaps(user, start_time, length):
-				return Res(data={'result': RES_SUCCESS, 'event_id': event.event_id})
+				event.save() # save unchanged object
+				return Res(data={'result': RES_FAILURE})
 
 			event.user = user
 			event.day = json_body['day'] if 'day' in json_body else event.day
@@ -172,7 +175,7 @@ def create_event(request):
 			event.event_name = json_body['event_name'] if 'event_name' in json_body else event.event_name
 			event.event_note = json_body['event_note'] if 'event_note' in json_body else event.event_note
 			event.category_id = json_body['category_id'] if 'category_id' in json_body else event.category_id
-			event.save()
+			event.save() # save changed object
 
 			ai_core.check_retrain(user=user)
 			return Res(data={'result': RES_SUCCESS, 'event_id': event.event_id})
