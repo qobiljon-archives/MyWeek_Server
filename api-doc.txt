@@ -1,0 +1,104 @@
+API Documentation for the project "My Week"
+Author:         Kobiljon Toshnazarov
+Last Edited:    October 4th, 2017
+
+
+Note:
+Return value 'result' is an integer field, and is always returned in a json object from all APIs.
+Return values are: -1(bad request), 0(success), 1(failure)
+Maximum event length is 720 minutes
+
+
+
+
+1 -*-*-*-*-*-*-*-*-*-*-*-*- Login API (POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    Checks existence of a user, and checks whether credentials are correct
+API URL:                        http://165.246.165.130:2222/users/login
+Required json header fields:    Content-Type (application/json)
+Required json body fields:      username (string, maxlen=32, PK)
+                                password (string, maxlen=32)
+Additional return fields:       reason (string, in bad request case)
+
+2 -*-*-*-*-*-*-*-*-*-*-*-*- Register API (POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    Registers a new user, after checking existence of given credentials
+API URL:                        http://165.246.165.130:2222/users/register
+Required json header fields:    Content-Type (application/json)
+Required json body fields:      username (string, maxlen=32, PK)
+                                password (string, maxlen=32)
+                                email (string, maxlen=64)
+Additional return fields:       error (string, in failure case)
+                                reason (string, in bad request case)
+
+3 -*-*-*-*-*-*-*-*-*-*-*-*- Create and Edit Event API (POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Desciption:                     Creates a customized event by the user in the server database
+API URL:                        http://165.246.165.130:2222/events/create
+Required json header fields:    Content-Type (application/json)
+Required json body fields:      username (string, maxlen=32, FK)
+                                password (string, maxlen=32)
+                                category_id (int, a value from category map api)
+                                start_time (integer, format: 'yymmddhh')
+                                day (integer, domain: 0-1-2-3-4-5-6 corresponds to sun-mon-tue-wed-thu-fri-sat)
+                                length (short integer, only multiple of 30 except 0)
+                                event_name (string, maxlen=32, default: empty string)
+                                event_note (string, maxlen=32, default: empty string)
+Additional return codes:        event_id (long, in success case)
+                                reason (string, in failure case)
+Notes:                          If 'event_id' value is passed to the 'Create Event API' and 'event_id' exists in the database,
+                                then all fields above are optional except 'username' and 'password'. The specified event with
+                                'event_id' will be updated with the provided fields. This will provide function of editing an
+                                existing event.
+
+4 -*-*-*-*-*-*-*-*-*-*-*-*- Category Map API (GET, POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    For downloading list of string-to-integer mapping of event categories and their codes.
+API URL:                        http://165.246.165.130:2222/events/categories
+Required json header fields:    (must not have a header, or header must be empty)
+Required json body fields:      (must not have a body, or body must be empty)
+Additional return codes:        categories (json-object array)
+
+5 -*-*-*-*-*-*-*-*-*-*-*-*- Suggest API (POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    Predicts and returns the most probable new personal event time according to a specific requested category ID using Artificial Intelligence.
+API URL:                        http://165.246.165.130:2222/events/suggest
+Required json header fields:    Content-Type (application/json)
+Required json body fields:      username (string, maxlen=32, FK)
+                                password (string, maxlen=32)
+                                category_id (int, a value from category map api)
+Additional json body fields:    users (string array, if this field exists, then group suggestion mode is turned on. this array contains usernames of group members)
+Additional return fields:       suggested_time (integer, format: 'hhd' hour-hour-day)
+
+6 -*-*-*-*-*-*-*-*-*-*-*-*- Fetch Events API (POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    Returns all events set at the specifically requested period of time.
+API URL:                        http://165.246.165.130:2222/events/fetch
+Required json header fields:    Content-Type (application/json)
+Required json body fields:      username (string, maxlen=32, FK)
+                                password (string, maxlen=32)
+                                period_from (integer)
+                                period_till (integer)
+
+7 -*-*-*-*-*-*-*-*-*-*-*-*- Disable API (POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    Disables a single event.
+API URL:                        http://165.246.165.130:2222/events/disable
+Required json header fields:    Content-Type (application/json)
+Required json body fields:      username (string, maxlen=32, FK)
+                                password (string, maxlen=32)
+                                event_id (long)
+
+8 -*-*-*-*-*-*-*-*-*-*-*-*- Populate API (POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    Temporary api for populating events on all categories on web server for better suggestions.
+API URL:                        http://165.246.165.130:2222/events/populate
+Required json header fields:    Content-Type (application/json)
+Required json body fields:      username (string, maxlen=32, FK)
+                                password (string, maxlen=32)
+                                size (int)
+
+9 -*-*-*-*-*-*-*-*-*-*-*-*- Constant Properties (Values) API (GET, POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:                    List of constant values used in Server side. The values must match in client side.
+API URL:                        http://165.246.165.130:2222/events/constants
+Required json header fields:    Content-Type (application/json)
+Additional return fields:       event_max_length (int, maximum length of events in minutes)
+
+10 -*-*-*-*-*-*-*-*-*-*-*-*- Template API (GET, POST): -*-*-*-*-*-*-*-*-*-*-*-*-
+Description:
+API URL:                        http://165.246.165.130:2222/~
+Required json header fields:    Content-Type (application/json)
+Required json body fields:
+Additional return fields:
